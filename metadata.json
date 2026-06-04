@@ -1,0 +1,6 @@
+{
+  "name": "Typography Studio",
+  "description": "A web-based text layout editor with multi-column support, typography manipulation, and custom font linking via URLs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
