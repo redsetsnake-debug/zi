@@ -16,6 +16,8 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
     columns,
     columnGap,
     fontFamily,
+    customFontUrl,
+    customFontFormat,
     fontSize,
     lineHeight,
     letterSpacing,
@@ -43,21 +45,26 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
 
   const renderCustomFont = () => {
     if (fontFamily !== 'CUSTOM' || !settings.customFontUrl) return null;
-
-    if (settings.customFontFormat === 'css') {
-      return <style>{`@import url('${settings.customFontUrl}');`}</style>;
-    } else {
+    
+    if (customFontFormat === 'css') {
+      return (
+        <style>
+          {`@import url('${customFontUrl}');`}
+        </style>
+      );
+    } else if (customFontFormat === 'font-file') {
       return (
         <style>
           {`
             @font-face {
               font-family: 'InjectedCustomFont';
-              src: url('${settings.customFontUrl}');
+              src: url('${customFontUrl}');
             }
           `}
         </style>
       );
     }
+    return null;
   };
 
   const activeFontFamily = fontFamily === 'CUSTOM' ? 
@@ -93,7 +100,7 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
             className={`bg-white transition-all duration-500 relative flex flex-col ${previewMode ? 'shadow-[0_25px_65px_-12px_rgba(0,0,0,0.35)] rounded-sm' : 'shadow-xl ring-1 ring-black/5'}`}
             style={{
               width: `${currentWidth}px`,
-              minHeight: `${pageHeight}px`,
+              height: `${pageHeight}px`,
               padding: `${paddingTop}px ${previewMode ? paddingRight * 1.5 : paddingRight}px ${paddingBottom}px ${previewMode ? paddingLeft * 1.5 : paddingLeft}px`,
               backgroundColor,
               transform: `scale(${finalScale})`,
@@ -106,10 +113,11 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
               ref={editorRef}
               contentEditable={!previewMode}
               onInput={handleInput}
-              className="w-full h-full flex-1 outline-none whitespace-pre-wrap break-words"
+              className="w-full h-full flex-1 outline-none whitespace-pre-wrap break-words overflow-auto"
               style={{
                 columnCount: previewMode ? columns * 2 : columns,
                 columnGap: `${columnGap}px`,
+                columnFill: settings.columnFill || 'auto',
                 fontFamily: activeFontFamily,
                 fontSize: `${fontSize}px`,
                 lineHeight: lineHeight,

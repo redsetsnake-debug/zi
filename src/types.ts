@@ -17,6 +17,7 @@ export interface DocSettings {
   paddingLeft: number;
   backgroundColor: string;
   textColor: string;
+  columnFill?: 'balance' | 'auto';
 }
 
 export const PRESET_FONTS = [
@@ -35,16 +36,17 @@ export const DEFAULT_SETTINGS: DocSettings = {
   fontFamily: '"Noto Sans SC", sans-serif',
   customFontUrl: '',
   customFontFormat: 'css',
-  fontSize: 16,
-  lineHeight: 1.8,
+  fontSize: 14,
+  lineHeight: 1.6,
   letterSpacing: 0,
   textAlign: 'justify',
-  pageWidth: 794, // A4 width at 96 DPI
-  pageHeight: 1123, // A4 height at 96 DPI
+  pageWidth: 794,
+  pageHeight: 1123,
   paddingTop: 80,
   paddingRight: 80,
   paddingBottom: 80,
   paddingLeft: 80,
-  backgroundColor: '#ffffff',
-  textColor: '#1a1a1a',
+  backgroundColor: '#FFFFFF',
+  textColor: '#1A1A1A',
+  columnFill: 'auto',
 };

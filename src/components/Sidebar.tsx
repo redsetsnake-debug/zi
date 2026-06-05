@@ -152,6 +152,27 @@ export function Sidebar({ settings, onChange }: SidebarProps) {
               </div>
             </div>
 
+            {/* Column Fill Style */}
+            {settings.columns > 1 && (
+              <div>
+                <span className="block text-xs font-semibold text-[#1A1A1A] mb-2">分栏排布方式 (Column Distribution)</span>
+                <div className="flex rounded overflow-hidden border border-[#D1D1CB] text-[11px] font-semibold">
+                  <button
+                    onClick={() => update('columnFill', 'auto')}
+                    className={`flex-1 py-2 font-bold transition-colors ${settings.columnFill !== 'balance' ? 'bg-[#1A1A1A] text-white' : 'text-[#1A1A1A] bg-white hover:bg-[#F2F2ED]'}`}
+                  >
+                    自然排布 (不强制对齐)
+                  </button>
+                  <button
+                    onClick={() => update('columnFill', 'balance')}
+                    className={`flex-1 py-2 font-bold transition-colors ${settings.columnFill === 'balance' ? 'bg-[#1A1A1A] text-white' : 'text-[#1A1A1A] bg-white hover:bg-[#F2F2ED]'}`}
+                  >
+                    高度对齐 (两栏平衡)
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Column Gaps */}
             <div>
               <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
