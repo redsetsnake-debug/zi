@@ -7,6 +7,7 @@ export default function App() {
   const [settings, setSettings] = useState<DocSettings>(DEFAULT_SETTINGS);
   const [previewMode, setPreviewMode] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const [activeTool, setActiveTool] = useState<'text' | 'drag'>('text');
 
   const handleSettingsChange = (updates: Partial<DocSettings>) => {
     setSettings((prev) => ({ ...prev, ...updates }));
@@ -23,8 +24,19 @@ export default function App() {
         <div className="flex items-center space-x-6">
           <div className="font-bold text-xl tracking-tighter">TYPE<span className="italic font-serif">FRAME</span></div>
           <div className="h-4 w-px bg-[#D1D1CB]"></div>
-          <div className="flex space-x-4 text-sm font-medium">
-            <span className="cursor-pointer border-b-2 border-[#1A1A1A]">设计模式</span>
+          <div className="flex space-x-3 text-sm font-medium">
+            <button 
+              onClick={() => setActiveTool('text')}
+              className={`px-3 py-1.5 rounded transition hover:bg-[#F2F2ED] ${activeTool === 'text' ? 'bg-[#F2F2ED] font-bold text-[#1A1A1A]' : 'text-gray-500'}`}
+            >
+              文本排版
+            </button>
+            <button 
+              onClick={() => setActiveTool('drag')}
+              className={`px-3 py-1.5 rounded transition hover:bg-[#F2F2ED] ${activeTool === 'drag' ? 'bg-[#F2F2ED] font-bold text-[#1A1A1A]' : 'text-gray-500'}`}
+            >
+              拖拽移动
+            </button>
           </div>
         </div>
         <div className="flex items-center space-x-4">
@@ -32,13 +44,13 @@ export default function App() {
             onClick={() => setPreviewMode(!previewMode)}
             className={`px-4 py-1.5 text-xs font-semibold rounded-full transition-colors ${previewMode ? 'bg-[#F27D26] text-white' : 'bg-[#1A1A1A] text-white'}`}
           >
-            {previewMode ? '退出预览' : '预览版面'}
+            {previewMode ? '退出预览' : '效果预览'}
           </button>
         </div>
       </nav>
 
       <div className="flex flex-1 overflow-hidden">
-        <Canvas settings={settings} setContent={handleContentChange} previewMode={previewMode} zoom={zoom} />
+        <Canvas settings={settings} setContent={handleContentChange} previewMode={previewMode} zoom={zoom} activeTool={activeTool} onUpdateSettings={handleSettingsChange} />
         {!previewMode && <Sidebar settings={settings} onChange={handleSettingsChange} />}
       </div>
 

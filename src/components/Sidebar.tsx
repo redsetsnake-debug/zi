@@ -41,15 +41,54 @@ export function Sidebar({ settings, onChange }: SidebarProps) {
             </div>
 
             {settings.fontFamily === 'CUSTOM' && (
-              <div className="space-y-2 bg-[#F9F9F7] p-3 rounded-lg border border-[#D1D1CB]">
-                <label className="block text-[10px] font-bold text-[#1A1A1A] uppercase">自定义字体链接</label>
-                <input 
-                  type="text" 
-                  placeholder="https://fonts.googleapis.com/css2?family=..."
-                  value={settings.customFontUrl}
-                  onChange={e => update('customFontUrl', e.target.value)}
-                  className="w-full border border-[#D1D1CB] bg-white rounded p-2 text-xs focus:outline-none focus:border-[#1A1A1A] transition-colors"
-                />
+              <div className="space-y-4 bg-[#F9F9F7] p-3 rounded-lg border border-[#D1D1CB]">
+                <div>
+                  <label className="block text-[10px] font-bold text-[#1A1A1A] uppercase mb-1">自定义字体链接</label>
+                  <input 
+                    type="text" 
+                    placeholder="如 https://fonts.googleapis.com/..."
+                    value={settings.customFontUrl}
+                    onChange={e => {
+                      const url = e.target.value;
+                      let format = settings.customFontFormat;
+                      let familyName = settings.customFontFamily;
+                      
+                      if (url.includes('fonts.googleapis.com/css')) {
+                        format = 'css';
+                        try {
+                          const urlObj = new URL(url);
+                          const familyParam = urlObj.searchParams.get('family');
+                          if (familyParam) {
+                            familyName = `'${familyParam.split(':')[0].replace(/\+/g, ' ')}', sans-serif`;
+                          }
+                        } catch (err) {}
+                      } else if (url.endsWith('.ttf') || url.endsWith('.otf') || url.endsWith('.woff') || url.endsWith('.woff2')) {
+                        format = 'font-file';
+                      }
+
+                      onChange({ 
+                        customFontUrl: url, 
+                        customFontFormat: format,
+                        customFontFamily: familyName
+                      });
+                    }}
+                    className="w-full border border-[#D1D1CB] bg-white rounded p-2 text-xs focus:outline-none focus:border-[#1A1A1A] transition-colors"
+                  />
+                </div>
+                
+                {settings.customFontUrl && settings.customFontFormat === 'css' && (
+                  <div>
+                    <label className="block text-[10px] font-bold text-[#1A1A1A] uppercase mb-1">CSS Font-Family 名称</label>
+                    <input 
+                      type="text" 
+                      placeholder="例如: 'Roboto', sans-serif"
+                      value={settings.customFontFamily}
+                      onChange={e => update('customFontFamily', e.target.value)}
+                      className="w-full border border-[#D1D1CB] bg-white rounded p-2 text-xs focus:outline-none focus:border-[#1A1A1A] transition-colors font-mono"
+                    />
+                  </div>
+                )}
+
                 <div className="flex items-center gap-4 text-xs mt-2 text-[#1A1A1A]">
                   <label className="flex items-center gap-1 cursor-pointer">
                     <input type="radio" checked={settings.customFontFormat === 'css'} onChange={() => update('customFontFormat', 'css')} name="fontfmt" className="accent-[#1A1A1A]"/> 
@@ -61,8 +100,23 @@ export function Sidebar({ settings, onChange }: SidebarProps) {
                   </label>
                 </div>
                 <p className="text-[10px] opacity-60 leading-tight">
-                  在此粘贴 CSS 链接（如 Google Fonts）或字体文件 URL。
+                  在此粘贴 CSS 链接（如 Google Fonts）或字体文件 URL。输入 Google Fonts 会自动解析字体名称。
                 </p>
+
+                {settings.customFontUrl && (
+                  <div className="bg-white border text-center border-[#D1D1CB] rounded p-4 mt-2">
+                    <div className="text-[10px] uppercase font-bold opacity-50 mb-2">实时字体预览</div>
+                    <div 
+                      className="text-lg"
+                      style={{ 
+                        fontFamily: settings.customFontFormat === 'font-file' ? "'InjectedCustomFont', sans-serif" : (settings.customFontFamily || 'inherit'),
+                      }}
+                    >
+                      Typography 字体展示<br/>
+                      The quick brown fox
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

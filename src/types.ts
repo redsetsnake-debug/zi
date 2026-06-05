@@ -5,6 +5,7 @@ export interface DocSettings {
   fontFamily: string;
   customFontUrl: string;
   customFontFormat: 'css' | 'font-file';
+  customFontFamily: string;
   fontSize: number;
   lineHeight: number;
   letterSpacing: number;
@@ -18,6 +19,9 @@ export interface DocSettings {
   backgroundColor: string;
   textColor: string;
   columnFill?: 'balance' | 'auto';
+  polygonBox?: { x: number; y: number }[];
+  textPosX?: number;
+  textPosY?: number;
 }
 
 export const PRESET_FONTS = [
@@ -36,6 +40,7 @@ export const DEFAULT_SETTINGS: DocSettings = {
   fontFamily: '"Noto Sans SC", sans-serif',
   customFontUrl: '',
   customFontFormat: 'css',
+  customFontFamily: '',
   fontSize: 14,
   lineHeight: 1.6,
   letterSpacing: 0,

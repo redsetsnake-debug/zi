@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { DocSettings } from '../types';
 
 interface CanvasProps {
@@ -6,11 +6,17 @@ interface CanvasProps {
   setContent: (content: string) => void;
   previewMode?: boolean;
   zoom?: number;
+  activeTool?: 'text' | 'drag';
+  onUpdateSettings?: (updates: Partial<DocSettings>) => void;
 }
 
-export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }: CanvasProps) {
+export function Canvas({ settings, setContent, previewMode = false, zoom = 100, activeTool = 'text', onUpdateSettings }: CanvasProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({x: 0, y: 0});
+  const [dragOffset, setDragOffset] = useState({x: 0, y: 0});
+
   const {
     content,
     columns,
@@ -30,7 +36,42 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
     paddingLeft,
     backgroundColor,
     textColor,
+    textPosX = 0,
+    textPosY = 0,
   } = settings;
+
+  const scale = zoom / 100;
+  const finalScale = previewMode ? scale * 0.85 : scale;
+  const currentWidth = previewMode ? pageWidth * 2 : pageWidth;
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (activeTool === 'drag' && !previewMode) {
+      e.preventDefault();
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && activeTool === 'drag') {
+      const dx = (e.clientX - dragStart.x) / finalScale;
+      const dy = (e.clientY - dragStart.y) / finalScale;
+      setDragOffset({ x: dx, y: dy });
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      if (onUpdateSettings) {
+        onUpdateSettings({
+          textPosX: textPosX + dragOffset.x,
+          textPosY: textPosY + dragOffset.y
+        });
+      }
+      setDragOffset({ x: 0, y: 0 });
+    }
+  };
 
   // Sync content initially if empty
   useEffect(() => {
@@ -45,7 +86,6 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
 
   const renderCustomFont = () => {
     if (fontFamily !== 'CUSTOM' || !settings.customFontUrl) return null;
-    
     if (customFontFormat === 'css') {
       return (
         <style>
@@ -68,12 +108,10 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
   };
 
   const activeFontFamily = fontFamily === 'CUSTOM' ? 
-    (settings.customFontUrl && settings.customFontFormat === 'font-file' ? "'InjectedCustomFont', sans-serif" : 'inherit') 
+    (settings.customFontUrl ? 
+      (settings.customFontFormat === 'font-file' ? "'InjectedCustomFont', sans-serif" : (settings.customFontFamily || 'inherit')) 
+      : 'inherit') 
     : fontFamily;
-
-  const scale = zoom / 100;
-  const finalScale = previewMode ? scale * 0.85 : scale;
-  const currentWidth = previewMode ? pageWidth * 2 : pageWidth;
 
   return (
     <main className="flex-1 bg-[#E5E5E1] overflow-auto relative">
@@ -98,6 +136,10 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
           {/* The Digital Page */}
           <div 
             className={`bg-white transition-all duration-500 relative flex flex-col ${previewMode ? 'shadow-[0_25px_65px_-12px_rgba(0,0,0,0.35)] rounded-sm' : 'shadow-xl ring-1 ring-black/5'}`}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
             style={{
               width: `${currentWidth}px`,
               height: `${pageHeight}px`,
@@ -107,13 +149,14 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
               transformOrigin: 'top left',
               backgroundImage: previewMode ? `linear-gradient(to right, transparent, rgba(0,0,0,0.01) 48%, rgba(0,0,0,0.15) 50%, rgba(255,255,255,0.8) 51%, rgba(0,0,0,0.05) 53%, transparent)` : 'none',
               backgroundSize: '100% 100%',
+              cursor: activeTool === 'drag' ? (isDragging ? 'grabbing' : 'grab') : 'text',
             }}
           >
             <div
               ref={editorRef}
-              contentEditable={!previewMode}
+              contentEditable={!previewMode && activeTool === 'text'}
               onInput={handleInput}
-              className="w-full h-full flex-1 outline-none whitespace-pre-wrap break-words overflow-auto"
+              className={`w-full h-full outline-none whitespace-pre-wrap break-words overflow-visible ${activeTool !== 'text' ? 'pointer-events-none' : ''}`}
               style={{
                 columnCount: previewMode ? columns * 2 : columns,
                 columnGap: `${columnGap}px`,
@@ -124,6 +167,7 @@ export function Canvas({ settings, setContent, previewMode = false, zoom = 100 }
                 letterSpacing: `${letterSpacing}px`,
                 textAlign: textAlign,
                 color: textColor,
+                transform: `translate(${textPosX + dragOffset.x}px, ${textPosY + dragOffset.y}px)`,
               }}
               suppressContentEditableWarning={true}
             />
