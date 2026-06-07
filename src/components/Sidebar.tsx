@@ -7,6 +7,33 @@ interface SidebarProps {
   onChange: (updates: Partial<DocSettings>) => void;
 }
 
+const SliderInput = ({ 
+  label, value, min, max, step, onChange, unit = "" 
+}: { 
+  label: React.ReactNode, value: number, min: number, max: number, step: number, onChange: (v: number) => void, unit?: string 
+}) => (
+  <div>
+    <label className="flex justify-between items-center text-[#1A1A1A] mb-1 text-xs">
+      <span className={typeof label === 'string' ? "font-semibold" : "opacity-80"}>{label}</span>
+      <div className="flex items-center gap-1">
+        <input 
+          type="number" 
+          value={value} 
+          onChange={e => onChange(Number(e.target.value))} 
+          className="w-12 bg-[#F9F9F7] border border-[#D1D1CB] rounded p-0.5 text-right font-mono text-[10px] focus:outline-none focus:border-[#1A1A1A]" 
+        />
+        {unit && <span className="text-[10px] opacity-60 font-mono">{unit}</span>}
+      </div>
+    </label>
+    <input 
+      type="range" min={min} max={max} step={step}
+      value={value}
+      onChange={e => onChange(Number(e.target.value))}
+      className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]"
+    />
+  </div>
+);
+
 export function Sidebar({ settings, onChange }: SidebarProps) {
   const update = (key: keyof DocSettings, value: any) => {
     onChange({ [key]: value });
@@ -24,6 +51,53 @@ export function Sidebar({ settings, onChange }: SidebarProps) {
 
       <div className="flex-1 space-y-8">
         
+        {/* === Colors Section === */}
+        <section className="space-y-4">
+          <label className="text-[10px] uppercase tracking-widest font-bold opacity-50 block">颜色设置 (Colors)</label>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
+                <span className="font-semibold">文本颜色</span>
+                <span className="font-mono text-[10px] opacity-60">{settings.textColor}</span>
+              </label>
+              <div className="flex bg-[#F9F9F7] border border-[#D1D1CB] rounded p-1 items-center gap-2">
+                <input 
+                  type="color" 
+                  value={settings.textColor} 
+                  onChange={e => update('textColor', e.target.value)} 
+                  className="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
+                />
+                <input
+                  type="text"
+                  value={settings.textColor}
+                  onChange={e => update('textColor', e.target.value)}
+                  className="flex-1 min-w-0 bg-transparent border-none outline-none text-xs text-[#1A1A1A] uppercase font-mono"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
+                <span className="font-semibold">背景颜色</span>
+                <span className="font-mono text-[10px] opacity-60">{settings.backgroundColor}</span>
+              </label>
+              <div className="flex bg-[#F9F9F7] border border-[#D1D1CB] rounded p-1 items-center gap-2">
+                <input 
+                  type="color" 
+                  value={settings.backgroundColor} 
+                  onChange={e => update('backgroundColor', e.target.value)} 
+                  className="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent shrink-0"
+                />
+                <input
+                  type="text"
+                  value={settings.backgroundColor}
+                  onChange={e => update('backgroundColor', e.target.value)}
+                  className="flex-1 min-w-0 bg-transparent border-none outline-none text-xs text-[#1A1A1A] uppercase font-mono"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* === Typography Section === */}
         <section>
           <label className="text-[10px] uppercase tracking-widest font-bold opacity-50 mb-3 block">字体库</label>
@@ -142,44 +216,9 @@ export function Sidebar({ settings, onChange }: SidebarProps) {
             </div>
 
             <div className="space-y-4 pt-4 border-t border-[#D1D1CB]">
-              <div>
-                <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                  <span className="font-semibold">字号</span>
-                  <div className="bg-[#F2F2ED] px-2 py-0.5 rounded font-mono text-[10px]">{settings.fontSize}px</div>
-                </label>
-                <input 
-                  type="range" min="8" max="72" step="1"
-                  value={settings.fontSize}
-                  onChange={e => update('fontSize', Number(e.target.value))}
-                  className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]"
-                />
-              </div>
-
-              <div>
-                <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                  <span className="font-semibold">行高</span>
-                  <div className="bg-[#F2F2ED] px-2 py-0.5 rounded font-mono text-[10px]">{settings.lineHeight}x</div>
-                </label>
-                <input 
-                  type="range" min="1" max="3" step="0.1"
-                  value={settings.lineHeight}
-                  onChange={e => update('lineHeight', Number(e.target.value))}
-                  className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]"
-                />
-              </div>
-
-              <div>
-                <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                  <span className="font-semibold">字间距</span>
-                  <div className="bg-[#F2F2ED] px-2 py-0.5 rounded font-mono text-[10px]">{settings.letterSpacing}px</div>
-                </label>
-                <input 
-                  type="range" min="-2" max="10" step="0.5"
-                  value={settings.letterSpacing}
-                  onChange={e => update('letterSpacing', Number(e.target.value))}
-                  className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]"
-                />
-              </div>
+              <SliderInput label="字号" value={settings.fontSize} min={8} max={72} step={1} onChange={v => update('fontSize', v)} unit="px" />
+              <SliderInput label="行高" value={settings.lineHeight} min={1} max={3} step={0.1} onChange={v => update('lineHeight', v)} unit="x" />
+              <SliderInput label="字间距" value={settings.letterSpacing} min={-2} max={10} step={0.5} onChange={v => update('letterSpacing', v)} unit="px" />
             </div>
             
           </div>
@@ -229,50 +268,17 @@ export function Sidebar({ settings, onChange }: SidebarProps) {
 
             {/* Column Gaps */}
             <div>
-              <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                <span className="font-semibold">栏间距 (Column Gap)</span>
-                <div className="bg-[#F2F2ED] px-2 py-0.5 rounded font-mono text-[10px]">{settings.columnGap}px</div>
-              </label>
-              <input 
-                type="range" min="0" max="100" step="4"
-                value={settings.columnGap}
-                onChange={e => update('columnGap', Number(e.target.value))}
-                className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]"
-              />
+              <SliderInput label="栏间距 (Column Gap)" value={settings.columnGap} min={0} max={100} step={4} onChange={v => update('columnGap', v)} unit="px" />
             </div>
 
             {/* Margins */}
             <div className="pt-4 border-t border-[#D1D1CB] border-dashed">
               <span className="block text-xs font-semibold text-[#1A1A1A] mb-3">页边距调整 (Margins)</span>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                    <span className="opacity-80">上 (Top)</span>
-                    <span className="font-mono text-[10px] opacity-60">{settings.paddingTop}px</span>
-                  </label>
-                  <input type="range" min="0" max="250" step="5" value={settings.paddingTop} onChange={e => update('paddingTop', Number(e.target.value))} className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]" />
-                </div>
-                <div>
-                  <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                    <span className="opacity-80">下 (Bottom)</span>
-                    <span className="font-mono text-[10px] opacity-60">{settings.paddingBottom}px</span>
-                  </label>
-                  <input type="range" min="0" max="250" step="5" value={settings.paddingBottom} onChange={e => update('paddingBottom', Number(e.target.value))} className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]" />
-                </div>
-                <div>
-                  <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                    <span className="opacity-80">左 (Left)</span>
-                    <span className="font-mono text-[10px] opacity-60">{settings.paddingLeft}px</span>
-                  </label>
-                  <input type="range" min="0" max="250" step="5" value={settings.paddingLeft} onChange={e => update('paddingLeft', Number(e.target.value))} className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]" />
-                </div>
-                <div>
-                  <label className="flex justify-between text-[#1A1A1A] mb-1 text-xs">
-                    <span className="opacity-80">右 (Right)</span>
-                    <span className="font-mono text-[10px] opacity-60">{settings.paddingRight}px</span>
-                  </label>
-                  <input type="range" min="0" max="250" step="5" value={settings.paddingRight} onChange={e => update('paddingRight', Number(e.target.value))} className="w-full h-1 bg-[#D1D1CB] appearance-none rounded-lg cursor-pointer accent-[#1A1A1A]" />
-                </div>
+                <SliderInput label={<span>上 (Top)</span>} value={settings.paddingTop} min={0} max={250} step={5} onChange={v => update('paddingTop', v)} unit="px" />
+                <SliderInput label={<span>下 (Bottom)</span>} value={settings.paddingBottom} min={0} max={250} step={5} onChange={v => update('paddingBottom', v)} unit="px" />
+                <SliderInput label={<span>左 (Left)</span>} value={settings.paddingLeft} min={0} max={250} step={5} onChange={v => update('paddingLeft', v)} unit="px" />
+                <SliderInput label={<span>右 (Right)</span>} value={settings.paddingRight} min={0} max={250} step={5} onChange={v => update('paddingRight', v)} unit="px" />
               </div>
             </div>
           </div>
